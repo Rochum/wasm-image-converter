@@ -1,15 +1,15 @@
-use image::codecs::ico::IcoEncoder;
-use image::codecs::{
-    avif::AvifEncoder,
-    bmp::BmpEncoder,
-    jpeg::JpegEncoder,
-    png::{CompressionType, FilterType, PngEncoder},
-    webp::WebPEncoder,
-};
+use image::codecs::png::{CompressionType, FilterType, PngEncoder};
 use wasm_bindgen::prelude::*;
 
-mod wasm_image;
-use wasm_image::image_to;
+
+mod helpers;
+use helpers::image_to;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    pub fn log(s: &str);
+}
 
 #[wasm_bindgen]
 pub fn get_preview(image: &[u8]) -> Result<Vec<u8>, JsError> {
@@ -24,53 +24,32 @@ pub fn get_preview(image: &[u8]) -> Result<Vec<u8>, JsError> {
 }
 
 #[wasm_bindgen]
-pub fn image_to_png(image: Vec<u8>) -> Result<Vec<u8>, JsError> {
-    let mut converted_image: Vec<u8> = Vec::new();
-    let encoder = PngEncoder::new_with_quality(
-        &mut converted_image,
-        CompressionType::Best,
-        FilterType::NoFilter,
-    );
-    image_to(image, encoder)?;
-    Ok(converted_image)
+pub fn convert_image(
+    new_format: SupportedTypes,
+    image: &[u8],
+    quality: Option<u8>,
+) -> Result<Vec<u8>, JsError> {
+    log(&format!("{:?}", new_format));
+    let quality = quality.unwrap_or(100);
+    let image = image.to_vec();
+
+    match new_format {
+        SupportedTypes::Bmp => helpers::image_to_bmp(image),
+        SupportedTypes::Jpeg => helpers::image_to_jpeg(image, quality),
+        SupportedTypes::Png=> helpers::image_to_png(image),
+        SupportedTypes::Webp=> helpers::image_to_webp(image),
+        SupportedTypes::Avif=> helpers::image_to_avif(image, quality),
+        SupportedTypes::Ico=> helpers::image_to_ico(image)
+    }
 }
 
 #[wasm_bindgen]
-pub fn image_to_jpeg(image: Vec<u8>) -> Result<Vec<u8>, JsError> {
-    let mut converted_image: Vec<u8> = Vec::new();
-    let encoder = JpegEncoder::new_with_quality(&mut converted_image, 95);
-    image_to(image, encoder)?;
-    Ok(converted_image)
-}
-
-#[wasm_bindgen]
-pub fn image_to_webp(image: Vec<u8>) -> Result<Vec<u8>, JsError> {
-    let mut converted_image: Vec<u8> = Vec::new();
-    let encoder = WebPEncoder::new_lossless(&mut converted_image);
-    image_to(image, encoder)?;
-    Ok(converted_image)
-}
-
-#[wasm_bindgen]
-pub fn image_to_avif(image: Vec<u8>) -> Result<Vec<u8>, JsError> {
-    let mut converted_image: Vec<u8> = Vec::new();
-    let encoder = AvifEncoder::new_with_speed_quality(&mut converted_image, 10, 95);
-    image_to(image, encoder)?;
-    Ok(converted_image)
-}
-
-#[wasm_bindgen]
-pub fn image_to_ico(image: Vec<u8>) -> Result<Vec<u8>, JsError> {
-    let mut converted_image: Vec<u8> = Vec::new();
-    let encoder = IcoEncoder::new(&mut converted_image);
-    image_to(image, encoder)?;
-    Ok(converted_image)
-}
-
-#[wasm_bindgen]
-pub fn image_to_bmp(image: Vec<u8>) -> Result<Vec<u8>, JsError> {
-    let mut converted_image: Vec<u8> = Vec::new();
-    let encoder = BmpEncoder::new(&mut converted_image);
-    image_to(image, encoder)?;
-    Ok(converted_image)
+#[derive(Debug)]
+pub enum SupportedTypes {
+    Bmp,
+    Jpeg,
+    Png,
+    Webp,
+    Avif,
+    Ico,
 }
