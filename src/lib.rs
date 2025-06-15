@@ -1,6 +1,9 @@
-use image::codecs::png::{CompressionType, FilterType, PngEncoder};
-use wasm_bindgen::prelude::*;
+use std::{collections::binary_heap, fmt::format, io::{BufWriter, Cursor}};
 
+use image::{
+    buffer, codecs::png::{CompressionType, FilterType, PngEncoder}, guess_format, imageops::FilterType::Lanczos3, load_from_memory_with_format
+};
+use wasm_bindgen::prelude::*;
 
 mod helpers;
 use helpers::image_to;
@@ -24,22 +27,40 @@ pub fn get_preview(image: &[u8]) -> Result<Vec<u8>, JsError> {
 }
 
 #[wasm_bindgen]
+pub fn resize_image(image: &[u8], width: u32, height: u32) -> Result<Vec<u8>, JsError> {
+    log(&format!("{} {}", width, height));
+    let image_format = match guess_format(image) {
+        Ok(format) => format,
+        Err(message) => return Err(JsError::new(&message.to_string())),
+    };
+    let dynamic_image = load_from_memory_with_format(image, image_format)?;
+
+    let new_image = dynamic_image.resize(width, height, Lanczos3);
+
+    let mut bytes: Vec<u8> = Vec::new();
+    let mut buffer = Cursor::new(&mut bytes);
+
+    let uwu = new_image.write_to(&mut buffer, image_format);
+    log(&format!("{:?}", image_format));
+    Ok(bytes)
+}
+
+#[wasm_bindgen]
 pub fn convert_image(
     new_format: SupportedTypes,
     image: &[u8],
     quality: Option<u8>,
 ) -> Result<Vec<u8>, JsError> {
-    log(&format!("{:?}", new_format));
     let quality = quality.unwrap_or(100);
     let image = image.to_vec();
 
     match new_format {
         SupportedTypes::Bmp => helpers::image_to_bmp(image),
         SupportedTypes::Jpeg => helpers::image_to_jpeg(image, quality),
-        SupportedTypes::Png=> helpers::image_to_png(image),
-        SupportedTypes::Webp=> helpers::image_to_webp(image),
-        SupportedTypes::Avif=> helpers::image_to_avif(image, quality),
-        SupportedTypes::Ico=> helpers::image_to_ico(image)
+        SupportedTypes::Png => helpers::image_to_png(image),
+        SupportedTypes::Webp => helpers::image_to_webp(image),
+        SupportedTypes::Avif => helpers::image_to_avif(image, quality),
+        SupportedTypes::Ico => helpers::image_to_ico(image),
     }
 }
 
