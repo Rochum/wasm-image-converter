@@ -1,7 +1,15 @@
-use std::{collections::binary_heap, fmt::format, io::{BufWriter, Cursor}};
+use std::{
+    collections::binary_heap,
+    fmt::format,
+    io::{BufWriter, Cursor},
+};
 
 use image::{
-    buffer, codecs::png::{CompressionType, FilterType, PngEncoder}, guess_format, imageops::FilterType::Lanczos3, load_from_memory_with_format
+    buffer,
+    codecs::png::{CompressionType, FilterType, PngEncoder},
+    guess_format,
+    imageops::FilterType::Lanczos3,
+    load_from_memory_with_format,
 };
 use wasm_bindgen::prelude::*;
 
@@ -45,7 +53,7 @@ pub fn resize_image(image: &[u8], width: u32, height: u32) -> Result<Vec<u8>, Js
 
 #[wasm_bindgen(js_name = convertImage)]
 pub fn convert_image(
-    new_format: SupportedTypes,
+    #[wasm_bindgen(js_name = newFormat)] new_format: SupportedTypes,
     image: &[u8],
     quality: Option<u8>,
 ) -> Result<Vec<u8>, JsError> {
