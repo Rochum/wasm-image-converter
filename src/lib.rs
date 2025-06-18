@@ -1,11 +1,6 @@
-use std::{
-    collections::binary_heap,
-    fmt::format,
-    io::{BufWriter, Cursor},
-};
+use std::io::Cursor;
 
 use image::{
-    buffer,
     codecs::png::{CompressionType, FilterType, PngEncoder},
     guess_format,
     imageops::FilterType::Lanczos3,
@@ -15,12 +10,6 @@ use wasm_bindgen::prelude::*;
 
 mod helpers;
 use helpers::image_to;
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    pub fn log(s: &str);
-}
 
 #[wasm_bindgen(js_name = getPreview)]
 pub fn get_preview(image: &[u8]) -> Result<Vec<u8>, JsError> {
