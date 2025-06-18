@@ -14,7 +14,7 @@ extern "C" {
     pub fn log(s: &str);
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = getPreview)]
 pub fn get_preview(image: &[u8]) -> Result<Vec<u8>, JsError> {
     let mut converted_image: Vec<u8> = Vec::new();
     let encoder = PngEncoder::new_with_quality(
@@ -26,7 +26,7 @@ pub fn get_preview(image: &[u8]) -> Result<Vec<u8>, JsError> {
     Ok(converted_image)
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = resizeImage)]
 pub fn resize_image(image: &[u8], width: u32, height: u32) -> Result<Vec<u8>, JsError> {
     let image_format = match guess_format(image) {
         Ok(format) => format,
@@ -39,11 +39,11 @@ pub fn resize_image(image: &[u8], width: u32, height: u32) -> Result<Vec<u8>, Js
     let mut bytes: Vec<u8> = Vec::new();
     let mut buffer = Cursor::new(&mut bytes);
 
-    let uwu = new_image.write_to(&mut buffer, image_format);
+    new_image.write_to(&mut buffer, image_format)?;
     Ok(bytes)
 }
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = convertImage)]
 pub fn convert_image(
     new_format: SupportedTypes,
     image: &[u8],
