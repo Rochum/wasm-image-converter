@@ -28,7 +28,6 @@ pub fn get_preview(image: &[u8]) -> Result<Vec<u8>, JsError> {
 
 #[wasm_bindgen]
 pub fn resize_image(image: &[u8], width: u32, height: u32) -> Result<Vec<u8>, JsError> {
-    log(&format!("{} {}", width, height));
     let image_format = match guess_format(image) {
         Ok(format) => format,
         Err(message) => return Err(JsError::new(&message.to_string())),
@@ -41,7 +40,6 @@ pub fn resize_image(image: &[u8], width: u32, height: u32) -> Result<Vec<u8>, Js
     let mut buffer = Cursor::new(&mut bytes);
 
     let uwu = new_image.write_to(&mut buffer, image_format);
-    log(&format!("{:?}", image_format));
     Ok(bytes)
 }
 
