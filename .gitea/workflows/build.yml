@@ -1,0 +1,13 @@
+name: Build and tests
+run-name: ${{ gitea.actor }} is testing and building
+on: [push]
+
+jobs:
+  Build-Application:
+    runs-on: ubuntu-latest
+    container: rust
+    steps:
+      - run: apt update && apt install nodejs -y
+      - uses: actions/checkout@v4
+      - run: cargo test
+      - run: cargo build --release
