@@ -19,7 +19,7 @@ pub fn get_preview(image: &[u8]) -> Result<Vec<u8>, JsError> {
         CompressionType::Fast,
         FilterType::NoFilter,
     );
-    image_to(image.to_vec(), encoder)?;
+    image_to(image, encoder)?;
     Ok(converted_image)
 }
 
@@ -47,7 +47,6 @@ pub fn convert_image(
     quality: Option<u8>,
 ) -> Result<Vec<u8>, JsError> {
     let quality = quality.unwrap_or(100);
-    let image = image.to_vec();
 
     match new_format {
         SupportedTypes::Bmp => helpers::image_to_bmp(image),
